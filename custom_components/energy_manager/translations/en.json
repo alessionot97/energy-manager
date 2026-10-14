@@ -74,7 +74,16 @@
           "entity_id": "Interruttore",
           "power_entity": "Sensore potenza (facoltativo)",
           "watts": "Assorbimento nominale (W)",
-          "priority": "Posizione priorità (1 = maggiore)"
+          "priority": "Posizione priorità (1 = maggiore)",
+          "schedule_enabled": "Enable schedule for this load",
+          "schedule_start": "Schedule start",
+          "schedule_end": "Schedule end",
+          "schedule_inside": "Inside window (auto / force ON / force OFF)",
+          "schedule_outside": "Outside window (auto / force ON / force OFF)",
+          "schedule_weekdays": "Enabled weekdays (0=Mon, 6=Sun; comma-separated)",
+          "require_boiler_done": "Require boiler completion",
+          "condition_entity": "Required state entity (optional)",
+          "condition_state": "Required state for condition"
         }
       },
       "choose_edit": {
@@ -116,7 +125,16 @@
           "entity_id": "Interruttore",
           "power_entity": "Sensore potenza (facoltativo)",
           "watts": "Assorbimento nominale (W)",
-          "priority": "Posizione priorità (1 = maggiore)"
+          "priority": "Posizione priorità (1 = maggiore)",
+          "schedule_enabled": "Enable schedule for this load",
+          "schedule_start": "Schedule start",
+          "schedule_end": "Schedule end",
+          "schedule_inside": "Inside window (auto / force ON / force OFF)",
+          "schedule_outside": "Outside window (auto / force ON / force OFF)",
+          "schedule_weekdays": "Enabled weekdays (0=Mon, 6=Sun; comma-separated)",
+          "require_boiler_done": "Require boiler completion",
+          "condition_entity": "Required state entity (optional)",
+          "condition_state": "Required state for condition"
         }
       }
     },

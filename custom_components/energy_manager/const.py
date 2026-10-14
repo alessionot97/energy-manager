@@ -51,5 +51,8 @@ def default_loads(settings: dict | None = None) -> list[dict]:
         {"id": "wallbox", "name": "Wallbox OpenEVSE", "kind": "evse", "entity_id": s["wallbox_helper"],
          "power_entity": s["ev_power_entity"], "watts": 4140, "priority": 2},
         {"id": "termoarredo", "name": "Termoarredo", "kind": "switch", "entity_id": s["termo_switch"],
-         "power_entity": "", "watts": 500, "priority": 3},
+         "power_entity": "", "watts": 500, "priority": 3,
+         "schedule_enabled": False, "schedule_start": "16:00", "schedule_end": "20:00",
+         "schedule_inside": "on", "schedule_outside": "auto",
+         "schedule_weekdays": "0,1,2,3,4,5,6", "require_boiler_done": True},
     ]

@@ -26,6 +26,22 @@ def integer(low: int = 0, high: int = 100000):
         min=low, max=high, step=1, mode=selector.NumberSelectorMode.BOX))
 
 
+def schedule_fields(load: dict | None = None) -> dict:
+    """Optional recurring timetable, per-load conditions and override policy."""
+    d = load or {}
+    return {
+        vol.Required("schedule_enabled", default=d.get("schedule_enabled", False)): bool,
+        vol.Required("schedule_start", default=d.get("schedule_start", "16:00")): selector.TimeSelector(),
+        vol.Required("schedule_end", default=d.get("schedule_end", "20:00")): selector.TimeSelector(),
+        vol.Required("schedule_inside", default=d.get("schedule_inside", "auto")): vol.In(["auto", "on", "off"]),
+        vol.Required("schedule_outside", default=d.get("schedule_outside", "auto")): vol.In(["auto", "on", "off"]),
+        vol.Required("schedule_weekdays", default=d.get("schedule_weekdays", "0,1,2,3,4,5,6")): vol.Match(r"^[0-6](?:\s*,\s*[0-6])*$"),
+        vol.Required("require_boiler_done", default=d.get("require_boiler_done", False)): bool,
+        vol.Optional("condition_entity", default=d.get("condition_entity", "")): txt(),
+        vol.Required("condition_state", default=d.get("condition_state", "on")): txt(),
+    }
+
+
 class EnergyManagerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
@@ -159,9 +175,8 @@ class EnergyManagerOptionsFlow(config_entries.OptionsFlow):
                 errors["base"] = "duplicate_load"
             else:
                 self.opts["loads"].append({
-                    "id": slug, "name": user_input["name"], "kind": "switch",
-                    "entity_id": user_input["entity_id"],
-                    "power_entity": user_input.get("power_entity", ""),
+                    **user_input,
+                    "id": slug, "kind": "switch",
                     "watts": int(user_input["watts"]),
                     "priority": int(user_input["priority"]),
                 })
@@ -173,6 +188,7 @@ class EnergyManagerOptionsFlow(config_entries.OptionsFlow):
             vol.Optional("power_entity"): ent("sensor"),
             vol.Required("watts", default=500): integer(1, 15000),
             vol.Required("priority", default=len(self._ids()) + 1): integer(1, 100),
+            **schedule_fields(),
         }))
 
     async def async_step_choose_edit(self, user_input=None):
@@ -186,10 +202,9 @@ class EnergyManagerOptionsFlow(config_entries.OptionsFlow):
     async def async_step_edit_load(self, user_input=None):
         load = next(x for x in self.opts["loads"] if x["id"] == self._editing)
         if user_input is not None:
-            load.update({"name": user_input["name"], "entity_id": user_input["entity_id"],
-                         "power_entity": user_input.get("power_entity", ""),
-                         "watts": int(user_input["watts"]),
-                         "priority": int(user_input["priority"])})
+            load.update(user_input)
+            load["watts"] = int(user_input["watts"])
+            load["priority"] = int(user_input["priority"])
             self._reorder()
             return self._save()
         schema = {
@@ -202,6 +217,7 @@ class EnergyManagerOptionsFlow(config_entries.OptionsFlow):
             schema[vol.Optional("power_entity", default=load["power_entity"])] = ent("sensor")
         else:
             schema[vol.Optional("power_entity")] = ent("sensor")
+        schema.update(schedule_fields(load))
         return self.async_show_form(step_id="edit_load", data_schema=vol.Schema(schema))
 
     async def async_step_choose_remove(self, user_input=None):

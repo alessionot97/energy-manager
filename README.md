@@ -8,6 +8,7 @@ Custom integration for Home Assistant to coordinate rooftop solar, home battery 
 
 - Native Home Assistant integration with onboarding and options UI (`Settings → Devices & services → Add integration → Energy Manager`).
 - Manage loads: **add/edit/delete/reprioritize** any number of basic on/off switch loads, with measured or estimated consumption.
+- **Optional per-load schedules and conditions**: start/end daily times (also across midnight), selected weekdays, forced ON/OFF or solar AUTO both inside and outside the window, an optional Home Assistant entity-state condition, and dependency on boiler completion. Manual ON/OFF always overrides these automatic rules.
 - Three manual modes **auto/on/off** for *every* configured load using HA Select entities (including EVSE). Force ON overrides solar restrictions and can draw from grid; Force OFF immediately switches the device off.
 - Solar-first budgeting: **battery charging has priority**. Solar export (positive PCC) only; battery discharge (negative battery power) is deducted. Battery charging is **not counted** as free surplus.
 - Add measured running controllable loads back to the budget **once** when allocating, preventing self-induced switch oscillations. Controlled load priority is a numeric setting in the integration options.
@@ -18,6 +19,25 @@ Custom integration for Home Assistant to coordinate rooftop solar, home battery 
 - Notifications using `notify.send_message` only to `notify.iphone_di_alessio` by default.
 - Dedicated sensors for **net available surplus**, **reclaimable managed capacity**, **last decision**, and **boiler cycle status**.
 - Persistent modes, current limit, last switching times and boiler completion date across Home Assistant restarts.
+
+## Per-load scheduling — universal controls
+
+In **Configure → Add load** or **Configure → Select load to edit**, each load has these optional controls:
+
+| Setting | Meaning |
+|---|---|
+| Enable schedule | Apply the time plan to this load |
+| Start / end | Local recurring time window; e.g. 16:00–20:00 or 22:00–06:00 |
+| Inside / outside | `auto`: solar surplus; `on`: force ON including grid power; `off`: force OFF |
+| Weekdays | Comma-separated values: `0`=Monday, `1`=Tuesday, …, `6`=Sunday |
+| Require boiler complete | Automatic operations are blocked until the boiler has finished its daily heating cycle |
+| Condition entity / required state | Optional sensor, switch or binary sensor; automatic control is allowed only while its state matches (`on`, `off`, etc.) |
+
+**Precedence:** manual Force OFF / Force ON > mandatory daily boiler cutoff (except manual Force ON) > conditional state / weekday and schedule > stable solar allocation. A schedule's forced ON is a deliberate request to use grid power; it has priority over solar-only opportunistic loads. A missing condition entity fails closed.
+
+Example: for a towel heater that may run 16:00–20:00 without the sun *only after the boiler is hot*, edit the `Termoarredo` load, enable its schedule, select start `16:00`, end `20:00`, inside `on`, outside `off`, and **Require boiler complete**. To allow additional sunny heating earlier, set outside to `auto` instead.
+
+Boiler-specific `15:30–16:00` fallback and `16:00` hard automatic cutoff continue to apply regardless of optional per-load times. To override the cutoff, deliberately set the boiler's manual selector to Force ON.
 
 ## Install manually
 
@@ -56,8 +76,9 @@ Some names above are **assumptions inherited from earlier configurations**; veri
 
 ## Implementation details and limitations
 
-- In v0.0.1 only generic **on/off switches** can be added dynamically. A second EVSE or continuously variable HVAC load needs its own driver in a later release. The existing OpenEVSE driver is supported.
+- In v0.0.1 only generic **on/off switches** can be added dynamically. Each supports optional scheduled hours, weekdays and an entity-state condition. A second EVSE or continuously variable HVAC load needs its own driver in a later release. The existing OpenEVSE driver is supported.
 - Priority order is changed via **numeric position** in integration settings (not drag-and-drop).
+- Optional condition entities compare the state as a string (e.g. `on`); advanced numeric comparisons, sunset events and a full rule-builder UI are planned for later versions.
 - The 15:30 fallback gives a 30-minute heating opportunity, **not an absolute hot water temperature guarantee** if hot water was already drained, the heater is slow, a thermal safety trips, or measurement is inaccurate. The boiler shuts off by 16:00 regardless.
 - The grid-backup towel-warmer window can be turned off. The towel warmer is intentionally allowed to draw grid power during that window if the boiler cycle was marked complete.
 - An EV helper is not a physical feedback sensor; if HA restarts with inconsistent helper state, align the helper with real charger state before turning Auto on.

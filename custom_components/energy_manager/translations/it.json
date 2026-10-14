@@ -74,7 +74,16 @@
           "entity_id": "Interruttore",
           "power_entity": "Sensore potenza (facoltativo)",
           "watts": "Assorbimento nominale (W)",
-          "priority": "Posizione priorità (1 = maggiore)"
+          "priority": "Posizione priorità (1 = maggiore)",
+          "schedule_enabled": "Abilita programmazione per questo carico",
+          "schedule_start": "Inizio fascia oraria",
+          "schedule_end": "Fine fascia oraria",
+          "schedule_inside": "Durante la fascia (auto / forza ON / forza OFF)",
+          "schedule_outside": "Fuori fascia (auto / forza ON / forza OFF)",
+          "schedule_weekdays": "Giorni attivi (0=lun, 6=dom; separati da virgola)",
+          "require_boiler_done": "Richiede boiler completato",
+          "condition_entity": "Entità condizione (facoltativa)",
+          "condition_state": "Stato richiesto per la condizione"
         }
       },
       "choose_edit": {
@@ -116,7 +125,16 @@
           "entity_id": "Interruttore",
           "power_entity": "Sensore potenza (facoltativo)",
           "watts": "Assorbimento nominale (W)",
-          "priority": "Posizione priorità (1 = maggiore)"
+          "priority": "Posizione priorità (1 = maggiore)",
+          "schedule_enabled": "Abilita programmazione per questo carico",
+          "schedule_start": "Inizio fascia oraria",
+          "schedule_end": "Fine fascia oraria",
+          "schedule_inside": "Durante la fascia (auto / forza ON / forza OFF)",
+          "schedule_outside": "Fuori fascia (auto / forza ON / forza OFF)",
+          "schedule_weekdays": "Giorni attivi (0=lun, 6=dom; separati da virgola)",
+          "require_boiler_done": "Richiede boiler completato",
+          "condition_entity": "Entità condizione (facoltativa)",
+          "condition_state": "Stato richiesto per la condizione"
         }
       }
     },

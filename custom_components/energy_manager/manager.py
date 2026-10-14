@@ -268,6 +268,32 @@ class EnergyManager:
         else:
             self.boiler_low_since = None
 
+    def _scheduled_mode(self, load: dict, now: datetime) -> tuple[str, str]:
+        """Resolve per-load condition + weekday/time rules for automatic mode.
+
+        Manual on/off is handled by the caller and always takes precedence.
+        Missing condition entities are considered false (fail closed).
+        """
+        condition_entity = str(load.get("condition_entity", "")).strip()
+        if condition_entity:
+            entity = self.hass.states.get(condition_entity)
+            if entity is None or entity.state != str(load.get("condition_state", "on")):
+                return "off", f"condizione non soddisfatta: {condition_entity}"
+        if load.get("require_boiler_done", False) and load["kind"] != "boiler":
+            if self.boiler_done_date != now.date().isoformat():
+                return "off", "attesa completamento boiler"
+        if not load.get("schedule_enabled", False):
+            return "auto", "nessun orario applicato"
+        try:
+            weekdays = {int(day.strip()) for day in str(load.get("schedule_weekdays", "0,1,2,3,4,5,6")).split(",")}
+            if now.weekday() not in weekdays:
+                return "off", "giorno non abilitato"
+            active = within(now, load.get("schedule_start", "16:00"), load.get("schedule_end", "20:00"))
+            action = load.get("schedule_inside" if active else "schedule_outside", "auto")
+            return (action if action in ("auto", "on", "off") else "off"), ("orario attivo" if active else "fuori orario")
+        except (ValueError, TypeError):
+            return "off", "configurazione orario non valida"
+
     async def async_tick(self):
         async with self._lock:
             await self._tick_locked()
@@ -289,36 +315,47 @@ class EnergyManager:
             "chiuso alle 16" if after(now, self.cfg["boiler_cutoff"]) else "da riscaldare")
         self.snapshot["loads"] = {}
 
-        # Scheduled commitments are reserved BEFORE opportunistic solar loads,
-        # regardless of numeric rank. Forced ON modes have the same precedence.
+        # Mandatory schedules and manual Force ON are reserved first.
+        # A schedule alone cannot bypass the daily 16:00 boiler cutoff.
         commitments: dict[str, str] = {}
+        schedule_decisions = {load["id"]: self._scheduled_mode(load, now) for load in self.loads}
         for load in self.loads:
-            mode = self.modes.get(load["id"], "auto")
+            load_id = load["id"]
+            mode = self.modes.get(load_id, "auto")
+            timed, description = schedule_decisions[load_id]
+            boiler_blocked = load["kind"] == "boiler" and (
+                self.boiler_done_date == today or after(now, self.cfg["boiler_cutoff"]))
             if mode == "on":
-                commitments[load["id"]] = "forzatura manuale"
-            elif mode == "auto" and load["kind"] == "boiler" and self.boiler_done_date != today \
-                and within(now, self.cfg["boiler_force_at"], self.cfg["boiler_cutoff"]):
-                commitments[load["id"]] = "riscaldamento garantito 15:30–16:00"
-            elif mode == "auto" and load["id"] == "termoarredo" and bool(self.cfg["termo_grid_backup"]) \
-                and self.boiler_done_date == today and within(now, self.cfg["termo_grid_from"], self.cfg["termo_grid_until"]):
-                commitments[load["id"]] = "fascia riscaldamento dopo boiler completato"
+                commitments[load_id] = "forzatura manuale"
+            elif mode == "auto" and not boiler_blocked and timed == "on":
+                commitments[load_id] = f"accensione programmata: {description}"
+            elif mode == "auto" and load["kind"] == "boiler" and not boiler_blocked \
+                and timed != "off" and within(now, self.cfg["boiler_force_at"], self.cfg["boiler_cutoff"]):
+                commitments[load_id] = "riscaldamento garantito 15:30–16:00"
+            elif mode == "auto" and load_id == "termoarredo" and not load.get("schedule_enabled") \
+                and bool(self.cfg["termo_grid_backup"]) and self.boiler_done_date == today \
+                and within(now, self.cfg["termo_grid_from"], self.cfg["termo_grid_until"]):
+                commitments[load_id] = "fascia riscaldamento dopo boiler completato"
 
         remaining = capacity if capacity is not None else -1e9
         plans: dict[str, tuple[bool, str, int | None]] = {}
         for load in self.loads:
             load_id = load["id"]
+            timed, description = schedule_decisions[load_id]
             if load_id in commitments:
                 plans[load_id] = (True, commitments[load_id],
-                                  self.ev_forced_amp if load["kind"] == "evse" and self.modes[load_id] == "on" else None)
-                remaining -= self.ev_forced_amp * self._watts_per_amp() if load["kind"] == "evse" \
-                    and self.modes[load_id] == "on" else float(load["watts"])
+                                  self.ev_forced_amp if load["kind"] == "evse" else None)
+                remaining -= (self.ev_forced_amp * self._watts_per_amp() if load["kind"] == "evse"
+                              else float(load["watts"]))
             elif self.modes.get(load_id) == "off":
                 plans[load_id] = (False, "forzatura manuale OFF", None)
             elif load["kind"] == "boiler" and (self.boiler_done_date == today or after(now, self.cfg["boiler_cutoff"])):
                 plans[load_id] = (False, "ciclo concluso / dopo le 16", None)
-            elif load_id == "termoarredo" and self.boiler_done_date != today:
+            elif timed == "off":
+                plans[load_id] = (False, description, None)
+            elif load_id == "termoarredo" and not load.get("schedule_enabled") and self.boiler_done_date != today:
                 plans[load_id] = (False, "attesa fine riscaldamento boiler", None)
-            elif load_id == "termoarredo" and after(now, self.cfg["termo_grid_until"]):
+            elif load_id == "termoarredo" and not load.get("schedule_enabled") and after(now, self.cfg["termo_grid_until"]):
                 plans[load_id] = (False, "fuori dalla fascia termoarredo", None)
 
         for load in self.loads:
