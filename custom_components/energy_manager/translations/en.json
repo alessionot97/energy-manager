@@ -1,0 +1,134 @@
+{
+  "title": "Energy Manager",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configura Energy Manager",
+        "data": {
+          "pcc_entity": "Sensore potenza rete/PCC (positivo = immissione)",
+          "battery_entity": "Sensore potenza batteria (positivo = carica)",
+          "boiler_switch": "Interruttore boiler",
+          "boiler_power_entity": "Sensore consumo boiler",
+          "termo_switch": "Interruttore termoarredo",
+          "wallbox_helper": "Helper stato wallbox",
+          "ev_power_entity": "Sensore consumo wallbox",
+          "notify_entity": "Entità notifica iPhone"
+        }
+      }
+    },
+    "error": {
+      "same_sensors": "I sensori rete e batteria devono essere diversi"
+    }
+  },
+  "options": {
+    "step": {
+      "general": {
+        "title": "Rete, batteria e stabilità",
+        "data": {
+          "pcc_entity": "Sensore potenza rete/PCC (positivo = immissione)",
+          "battery_entity": "Sensore potenza batteria (positivo = carica)",
+          "reserve_w": "Margine di sicurezza (W)",
+          "switch_on_stable_s": "Surplus stabile prima accensione (secondi)",
+          "switch_off_stable_s": "Deficit prima spegnimento (secondi)",
+          "switch_min_on_s": "Tempo minimo acceso (secondi)",
+          "switch_min_off_s": "Tempo minimo spento (secondi)"
+        }
+      },
+      "schedule": {
+        "title": "Orari di boiler e termoarredo",
+        "data": {
+          "boiler_force_at": "Avvio boiler obbligatorio",
+          "boiler_cutoff": "Spegnimento boiler obbligatorio",
+          "termo_grid_from": "Inizio fascia termoarredo anche da rete",
+          "termo_grid_until": "Fine fascia termoarredo",
+          "termo_grid_backup": "Consenti al termoarredo prelievo dalla rete"
+        }
+      },
+      "evse": {
+        "title": "Configurazione OpenEVSE",
+        "data": {
+          "ev_power_entity": "Sensore potenza wallbox",
+          "wallbox_helper": "Helper stato wallbox",
+          "wallbox_current_helper": "Helper ampere wallbox",
+          "wallbox_coeff_helper": "Coefficiente kW/ampere",
+          "evse_start": "Azione REST avvio EVSE",
+          "evse_stop": "Azione REST stop EVSE",
+          "evse_set_amp": "Azione REST imposta ampere",
+          "ev_min_amp": "Corrente minima (A)",
+          "ev_max_amp": "Corrente massima (A)",
+          "ev_min_off_s": "Tempo minimo di pausa EVSE (secondi)",
+          "ev_min_on_s": "Tempo minimo ricarica EVSE (secondi)",
+          "ev_current_step_s": "Intervallo modifica ampere (secondi)"
+        }
+      },
+      "notifications": {
+        "title": "Notifiche",
+        "data": {
+          "notify_entity": "Entità notifica iPhone"
+        }
+      },
+      "add_load": {
+        "title": "Aggiungi un carico",
+        "data": {
+          "name": "Nome carico",
+          "entity_id": "Interruttore",
+          "power_entity": "Sensore potenza (facoltativo)",
+          "watts": "Assorbimento nominale (W)",
+          "priority": "Posizione priorità (1 = maggiore)"
+        }
+      },
+      "choose_edit": {
+        "title": "Modifica un carico",
+        "data": {
+          "load_id": "Dispositivo"
+        }
+      },
+      "choose_remove": {
+        "title": "Elimina un carico",
+        "data": {
+          "load_id": "Dispositivo"
+        }
+      },
+      "priority": {
+        "title": "Sposta una priorità",
+        "data": {
+          "load_id": "Dispositivo",
+          "priority": "Posizione priorità (1 = maggiore)"
+        }
+      },
+      "init": {
+        "title": "Impostazioni Energy Manager",
+        "menu_options": {
+          "general": "Rete, batteria e stabilità",
+          "schedule": "Orari di boiler e termoarredo",
+          "evse": "Configurazione OpenEVSE",
+          "notifications": "Notifiche",
+          "add_load": "Aggiungi un carico",
+          "choose_edit": "Modifica un carico",
+          "choose_remove": "Elimina un carico",
+          "priority": "Sposta una priorità"
+        }
+      },
+      "edit_load": {
+        "title": "Modifica carico",
+        "data": {
+          "name": "Nome carico",
+          "entity_id": "Interruttore",
+          "power_entity": "Sensore potenza (facoltativo)",
+          "watts": "Assorbimento nominale (W)",
+          "priority": "Posizione priorità (1 = maggiore)"
+        }
+      }
+    },
+    "error": {
+      "duplicate_load": "Nome già usato da un altro carico"
+    }
+  },
+  "entity": {
+    "select": {
+      "mode": {
+        "name": "Modalità"
+      }
+    }
+  }
+}
