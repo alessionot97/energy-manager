@@ -6,7 +6,7 @@ from .const import DOMAIN
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    manager = hass.data[DOMAIN][entry.entry_id]
+    manager = entry.runtime_data
     async_add_entities([ManagerSensor(manager, "net", "Surplus netto", "mdi:transmission-tower", "W"),
                         ManagerSensor(manager, "capacity", "Potenza gestibile", "mdi:solar-power", "W"),
                         ManagerSensor(manager, "reason", "Ultima decisione", "mdi:information-outline", None),

@@ -7,7 +7,7 @@ from .const import DOMAIN
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    manager = hass.data[DOMAIN][entry.entry_id]
+    manager = entry.runtime_data
     if any(item["kind"] == "evse" for item in manager.loads):
         async_add_entities([ManualEvAmps(manager)])
 

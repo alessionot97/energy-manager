@@ -7,7 +7,7 @@ from .const import DOMAIN, MODES
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    manager = hass.data[DOMAIN][entry.entry_id]
+    manager = entry.runtime_data
     async_add_entities([LoadMode(manager, load) for load in manager.loads])
 
 

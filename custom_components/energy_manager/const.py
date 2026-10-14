@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 DOMAIN = "energy_manager"
-VERSION = "0.0.1"
+VERSION = "0.0.3"
 PLATFORMS = ["sensor", "select", "number"]
 MODES = ("auto", "on", "off")
 TICK_SECONDS = 20
