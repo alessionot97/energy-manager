@@ -39,6 +39,20 @@ Example: for a towel heater that may run 16:00–20:00 without the sun *only aft
 
 Boiler-specific `15:30–16:00` fallback and `16:00` hard automatic cutoff continue to apply regardless of optional per-load times. To override the cutoff, deliberately set the boiler's manual selector to Force ON.
 
+## Install and update through HACS (recommended)
+
+**Requirements:** Home Assistant with HACS installed, plus a **public GitHub repository** containing this project's files on its default branch. Repository URL: `https://github.com/alessionot97/energy-manager` (available only after publishing).
+
+1. Go to **HACS**, open the **⋮** menu, then choose **Custom repositories**.
+2. Enter `https://github.com/alessionot97/energy-manager`, choose **Integration**, and add it.
+3. Find **Energy Manager** in HACS, open it, and choose **Download**.
+4. Restart Home Assistant. In **Settings → Devices & services → Add integration**, select **Energy Manager**.
+5. Configure your real meters and device entities, then **disable legacy automations driving those same relays** before the integration begins controlling them. Do not delete `rest_command` definitions or required helpers.
+
+**Updates:** Publish a new GitHub release containing an incremented `manifest.json` `version` and matching Git tag (`v0.0.2`, etc.). HACS will offer the updated release in Home Assistant. For the initial `v0.0.1`, create a proper GitHub release after pushing the tag (a tag alone can also be used by HACS, but releases are recommended).
+
+The repository contains GitHub Actions for Python tests, Hassfest and HACS validation. Passing local unit tests does **not** replace testing on an actual Home Assistant installation and verifying all OpenEVSE REST actions.
+
 ## Install manually
 
 1. Copy `custom_components/energy_manager/` to your Home Assistant `/config/custom_components/energy_manager/` directory.
