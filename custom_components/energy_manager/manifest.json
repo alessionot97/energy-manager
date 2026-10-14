@@ -1,12 +1,12 @@
 {
   "domain": "energy_manager",
   "name": "Energy Manager",
-  "version": "0.0.1",
-  "documentation": "https://github.com/alessionot97/energy-manager",
-  "issue_tracker": "https://github.com/alessionot97/energy-manager/issues",
   "codeowners": [],
   "config_flow": true,
+  "documentation": "https://github.com/alessionot97/energy-manager",
   "integration_type": "hub",
   "iot_class": "local_polling",
-  "requirements": []
+  "issue_tracker": "https://github.com/alessionot97/energy-manager/issues",
+  "requirements": [],
+  "version": "0.0.2"
 }
